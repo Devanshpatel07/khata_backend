@@ -21,17 +21,12 @@ export default function PhotoScannerView() {
 
   const fileInputRef = useRef(null);
 
-  const [scannedReel, setScannedReel] = useState([
-    { id: 1, title: 'Invoice #0941', status: 'Scanned', date: '12 Sep 2026', total: 14500, vendor: 'Apex Industrial Supplies', gst: 2610, previewUrl: null },
-    { id: 2, title: 'Receipt #8821', status: 'Scanning...', date: '12 Sep 2026', total: 4200, vendor: 'City Fuel Station', gst: 756, previewUrl: null },
-    { id: 3, title: 'PO #1002', status: 'Scanned', date: '11 Sep 2026', total: 9800, vendor: 'National Traders', gst: 1764, previewUrl: null }
-  ]);
-
-  const [activeBill, setActiveBill] = useState(scannedReel[2]); // Default active PO #1002
-  const [vendorName, setVendorName] = useState('National Traders');
-  const [invoiceNumber, setInvoiceNumber] = useState('PO-1002');
-  const [totalAmount, setTotalAmount] = useState('9800.00');
-  const [gstAmount, setGstAmount] = useState('1764.00');
+  const [scannedReel, setScannedReel] = useState([]);
+  const [activeBill, setActiveBill] = useState(null);
+  const [vendorName, setVendorName] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [totalAmount, setTotalAmount] = useState('0.00');
+  const [gstAmount, setGstAmount] = useState('0.00');
   const [txType, setTxType] = useState('GAVE');
   const [category, setCategory] = useState('INVOICE');
   const [selectedPartyId, setSelectedPartyId] = useState('');

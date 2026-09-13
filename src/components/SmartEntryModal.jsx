@@ -21,10 +21,11 @@ export default function SmartEntryModal({ isOpen, onClose }) {
   const [selectedType, setSelectedType] = useState('DEBIT');
   const [paymentMode, setPaymentMode] = useState('UPI');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isListening, setIsListening] = useState(false);
 
   if (!isOpen) return null;
 
-  // Real-time natural language heuristic parser
+  // Real-time natural language speech & text heuristic parser
   const parsedAmount = (() => {
     const match = promptText.match(/\d+/);
     return match ? match[0] : '0';
@@ -33,7 +34,8 @@ export default function SmartEntryModal({ isOpen, onClose }) {
   const parsedParty = (() => {
     if (promptText.toLowerCase().includes('ramesh')) return 'Ramesh';
     if (promptText.toLowerCase().includes('microsoft')) return 'Microsoft';
-    return parties.length > 0 ? parties[0].name : 'Apex Industrial Corp';
+    if (promptText.toLowerCase().includes('devansh')) return 'Devansh Patel';
+    return parties.length > 0 ? parties[0].name : 'General Customer';
   })();
 
   const parsedCategory = (() => {
@@ -41,6 +43,47 @@ export default function SmartEntryModal({ isOpen, onClose }) {
     if (promptText.toLowerCase().includes('salary')) return '💼 Salary';
     return '🛒 Supplies';
   })();
+
+  // Live Speech Recognition Engine (Web Speech API)
+  const handleStartMic = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Voice input is not supported by your current browser environment. You can type your transaction description directly into the prompt box.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setPromptText(transcript);
+        }
+        setIsListening(false);
+      };
+
+      recognition.onerror = (err) => {
+        console.warn('Speech recognition notice:', err);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.error('Failed to initialize speech recognition:', err);
+      setIsListening(false);
+    }
+  };
 
   const handleQuickAddAmount = (val) => {
     const num = parseInt(parsedAmount) + val;
@@ -125,7 +168,7 @@ export default function SmartEntryModal({ isOpen, onClose }) {
           <textarea
             value={promptText}
             onChange={(e) => setPromptText(e.target.value)}
-            placeholder={`Describe your transaction, e.g.\n"Spent 150 for dinner with Ramesh"\n"Received 20000 salary from Microsoft"`}
+            placeholder={`Describe your transaction or tap Mic, e.g.\n"Spent 150 for dinner with Ramesh"\n"Received 20000 salary from Devansh"`}
             rows={4}
             className="input-field font-mono"
             style={{
@@ -219,21 +262,23 @@ export default function SmartEntryModal({ isOpen, onClose }) {
         <div style={{ display: 'flex', gap: '0.85rem', alignItems: 'center' }}>
           <button
             type="button"
-            className="mic-pulse"
+            className={isListening ? "mic-pulse active" : "mic-pulse"}
+            title="Tap to speak transaction details"
             style={{
               width: '56px',
               height: '56px',
               borderRadius: '50%',
-              background: 'var(--color-purple-40)',
+              background: isListening ? 'linear-gradient(135deg, #EF4444, #F43F5E)' : 'var(--color-purple-40)',
               border: 'none',
               color: '#FFF',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               cursor: 'pointer',
-              flexShrink: 0
+              flexShrink: 0,
+              boxShadow: isListening ? '0 0 20px rgba(239, 68, 68, 0.6)' : 'none'
             }}
-            onClick={() => setPromptText('Spent 450 for dinner with Ramesh')}
+            onClick={handleStartMic}
           >
             <Mic size={24} />
           </button>
