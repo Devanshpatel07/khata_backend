@@ -11,12 +11,13 @@ import {
   FileCheck,
   Sparkles,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  ArrowLeft
 } from 'lucide-react';
 
 export default function PhotoScannerView() {
   const { currentWorkspace } = useAuthStore();
-  const { addTransaction, parties, createParty } = useLedgerStore();
+  const { addTransaction, parties, createParty, setActiveTab } = useLedgerStore();
 
   const fileInputRef = useRef(null);
 
@@ -247,13 +248,33 @@ export default function PhotoScannerView() {
 
       {/* Header Section */}
       <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderRadius: '20px' }}>
-        <div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--text-main)', margin: 0 }}>
-            <Camera size={24} color="var(--color-purple)" /> Photo & Bill Scanner Engine
-          </h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.35rem', lineHeight: '1.4' }}>
-            Instant OCR receipt text extraction, automatic field parsing, and ledger posting.
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            type="button"
+            onClick={() => setActiveTab('dashboard')}
+            style={{
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              borderRadius: '12px',
+              padding: '0.6rem',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            title="Back to Dashboard"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', margin: 0 }}>
+              <Camera size={22} color="var(--color-purple)" /> Photo & Bill Scanner Engine
+            </h2>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem', lineHeight: '1.3' }}>
+              Instant OCR receipt text extraction & ledger posting.
+            </p>
+          </div>
         </div>
 
         {/* Sole Prominent Action Button */}

@@ -65,9 +65,12 @@ class ErrorBoundary extends Component {
   }
 }
 
+import { App as CapApp } from '@capacitor/app';
+
 export default function App() {
   const { isAuthenticated, isLoading, currentWorkspace, initAuth } = useAuthStore();
-  const { activeTab, setActiveTab, fetchWorkspaceData } = useLedgerStore();
+  const store = useLedgerStore();
+  const { activeTab, setActiveTab, fetchWorkspaceData } = store;
   
   const [isSmartEntryOpen, setIsSmartEntryOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -83,6 +86,58 @@ export default function App() {
       fetchWorkspaceData(currentWorkspace.id);
     }
   }, [isAuthenticated, currentWorkspace]);
+
+  // Handle Hardware Back Button for Android App (1 step back navigation)
+  useEffect(() => {
+    let backListener = null;
+
+    const setupBackButton = async () => {
+      try {
+        backListener = await CapApp.addListener('backButton', () => {
+          // 1. Close open modals if present
+          if (isSmartEntryOpen) {
+            setIsSmartEntryOpen(false);
+            return;
+          }
+          if (isProfileOpen) {
+            setIsProfileOpen(false);
+            return;
+          }
+          if (isSearchOpen) {
+            setIsSearchOpen(false);
+            return;
+          }
+          if (store.isTransactionModalOpen) {
+            store.closeTransactionModal();
+            return;
+          }
+          if (store.selectedParty) {
+            store.setSelectedParty(null);
+            return;
+          }
+
+          // 2. Navigate back to dashboard if on any child screen
+          if (activeTab !== 'dashboard') {
+            setActiveTab('dashboard');
+            return;
+          }
+
+          // 3. Only exit/minimize app when on Home Dashboard with no open modals
+          CapApp.minimizeApp();
+        });
+      } catch (err) {
+        console.warn('Native back button listener active in Capacitor env:', err);
+      }
+    };
+
+    setupBackButton();
+
+    return () => {
+      if (backListener && typeof backListener.remove === 'function') {
+        backListener.remove();
+      }
+    };
+  }, [isSmartEntryOpen, isProfileOpen, isSearchOpen, store.isTransactionModalOpen, store.selectedParty, activeTab]);
 
   if (isLoading) {
     return (

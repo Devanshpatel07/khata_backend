@@ -1,6 +1,6 @@
 class ApiClient {
   constructor() {
-    this.baseUrl = '/api/v1';
+    this.baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://khata-backend-l4ue.onrender.com/api/v1';
     this.token = localStorage.getItem('khata_token') || null;
   }
 
